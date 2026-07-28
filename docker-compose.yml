@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: processor-db
+    environment:
+      POSTGRES_DB: db_processor
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: processor-queue
+    environment:
+      RABBITMQ_DEFAULT_USER: root
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "5672:5672"   # Porta usada pelas aplicações (Laravel/Go) para mandar/ler mensagens
+      - "15672:15672" # Painel visual no navegador (Admin)
+  minio:
+    image: minio/minio
+    container_name: processor-s3
+    environment:
+      MINIO_ROOT_USER: root
+      MINIO_ROOT_PASSWORD: password
+    ports:
+      - "9000:9000" # Porta da API (Onde o Laravel e o Go vão se conectar)
+      - "9001:9001" # Porta do Painel Visual (Para você ver os arquivos)
+    command: server /data --console-address ":9001"
+    volumes:
+      - miniodata:/data
+  minio_setup:
+    image: minio/mc
+    container_name: processor-s3-setup
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 3;
+      /usr/bin/mc config host add myminio http://minio:9000 root password;
+      /usr/bin/mc mb myminio/bucket-local || true;
+      /usr/bin/mc anonymous set public myminio/bucket-local;
+      exit 0;
+      "
+volumes:
+  pgdata:
+  miniodata:
