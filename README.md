@@ -1,4 +1,4 @@
-# 🚀 Sistema Distribuído de Processamento de Imagens (Event-Driven)
+# 🚀 Event-Driven Distributed Image Processing System
 
 ![Laravel](https://img.shields.io/badge/API_Gateway-Laravel-FF2D20?style=for-the-badge&logo=laravel)
 ![Golang](https://img.shields.io/badge/Worker-Golang-00ADD8?style=for-the-badge&logo=go)
@@ -8,33 +8,33 @@
 ![DynamoDB](https://img.shields.io/badge/NoSQL-DynamoDB-4053D6?style=for-the-badge&logo=amazon-dynamodb)
 ![MinIO](https://img.shields.io/badge/Storage-MinIO_(S3)-C7202C?style=for-the-badge&logo=minio)
 
-## 📌 Sobre o Projeto
-Este projeto é uma prova de conceito (PoC) de uma arquitetura baseada em eventos (Event-Driven Architecture) projetada para resolver um problema clássico de escalabilidade: **o processamento pesado de arquivos em requisições web**.
+## 📌 About the Project
+This project is a Proof of Concept (PoC) of an Event-Driven Architecture designed to solve a classic scalability problem: **handling heavy file processing in web requests**.
 
-O sistema permite que os usuários façam upload de arquivos `.zip` contendo grandes lotes de imagens. Em vez de travar o servidor web descompactando e processando os arquivos de forma síncrona, a aplicação delega o trabalho pesado para um Worker assíncrono em alta performance, notificando o cliente em tempo real quando o processo é concluído.
+The system allows users to upload `.zip` files containing large batches of images. Instead of locking up the web server by unzipping and processing the files synchronously, the application delegates the heavy lifting to a high-performance asynchronous Worker, notifying the client in real-time once the process is complete.
 
-## 🏗️ Desenho da Arquitetura
+## 🏗️ Architecture Design
 
-1. **API Gateway (Laravel):** Recebe o arquivo ZIP de forma extremamente rápida, faz o upload direto para o Storage (MinIO/S3), registra a transação no **PostgreSQL** e publica uma mensagem no **RabbitMQ** retornando um `202 Accepted`.
-2. **Message Broker (RabbitMQ):** Atua como amortecedor (*Shock Absorber*), garantindo que picos de requisições não derrubem o servidor de processamento (Backpressure).
-3. **Worker (Golang):** Consome a fila. Utiliza *Goroutines* para baixar o ZIP do S3, extrair e processar dezenas de imagens em paralelo.
-4. **Persistência Poliglota:** Salva o status do processo no **PostgreSQL** (consistência ACID) e extrai os metadados dinâmicos de cada imagem (GPS, modelo da câmera, dimensões) para salvar no **DynamoDB** (NoSQL schema-less).
-5. **Real-Time (SSE):** O Laravel mantém um túnel de Server-Sent Events aberto com o **React**, empurrando a atualização de status para a tela do usuário no milissegundo em que o Go finaliza o trabalho.
+1. **API Gateway (Laravel):** Receives the ZIP file incredibly fast, uploads it directly to the Storage (MinIO/S3), registers the transaction in **PostgreSQL**, and publishes a message to **RabbitMQ** returning a `202 Accepted` response.
+2. **Message Broker (RabbitMQ):** Acts as a shock absorber, applying backpressure to ensure that request spikes do not crash the processing server.
+3. **Worker (Golang):** Consumes the queue. Utilizes *Goroutines* to download the ZIP from S3, extract, and process dozens of images in parallel.
+4. **Polyglot Persistence:** Saves the process status in **PostgreSQL** (ACID consistency) and extracts dynamic metadata from each image (GPS, camera model, dimensions) to save in **DynamoDB** (schema-less NoSQL).
+5. **Real-Time (SSE):** Laravel keeps a Server-Sent Events tunnel open with **React**, pushing the status update to the user's screen in the exact millisecond the Go worker finishes the job.
 
-## 🧠 Decisões Arquiteturais (Trade-offs)
-* **Por que não processar no Laravel?** Para evitar o esgotamento da memória RAM do servidor web e evitar erros de `504 Gateway Timeout` durante a descompactação de arquivos pesados.
-* **Por que RabbitMQ?** Garante resiliência. Se o Worker em Go cair, o Laravel continua recebendo uploads normalmente. Quando o Worker voltar, ele processa as tarefas acumuladas sem perda de dados.
-* **Por que DynamoDB junto com PostgreSQL?** Diferentes imagens possuem diferentes metadados. Evitamos criar uma tabela relacional esparsa (cheia de valores `NULL`) e delegamos dados não-estruturados para um banco NoSQL de alta performance.
-* **Por que SSE e não WebSockets?** O fluxo exigia uma comunicação estritamente unidirecional (Servidor -> Cliente) para atualização de status. O SSE atende a essa necessidade consumindo muito menos recursos de rede e infraestrutura do que um túnel bidirecional WebSocket.
+## 🧠 Architectural Decisions (Trade-offs)
+* **Why not process it in Laravel?** To prevent exhausting the web server's RAM and avoid `504 Gateway Timeout` errors when unzipping and processing heavy files.
+* **Why RabbitMQ?** It guarantees resilience. If the Go Worker crashes, Laravel continues to receive uploads normally. When the Worker is back online, it processes the accumulated tasks without any data loss.
+* **Why DynamoDB alongside PostgreSQL?** Different images have different metadata. We avoided creating a sparse relational table (filled with `NULL` values) and delegated the unstructured data to a high-performance NoSQL database.
+* **Why SSE and not WebSockets?** The workflow required strictly unidirectional communication (Server -> Client) for status updates. SSE meets this need while consuming significantly fewer network and infrastructure resources than a bidirectional WebSocket tunnel.
 
-## ⚙️ Como Executar Localmente
+## ⚙️ How to Run Locally
 
-### Pré-requisitos
-* Docker e Docker Compose
-* PHP 8.2+ e Composer
+### Prerequisites
+* Docker and Docker Compose
+* PHP 8.2+ and Composer
 * Golang 1.21+
 * Node.js 18+
 
-### 1. Subir a Infraestrutura (Bancos, Fila e Storage)
+### 1. Spin up the Infrastructure (Databases, Queue, and Storage)
 ```bash
 docker compose up -d
