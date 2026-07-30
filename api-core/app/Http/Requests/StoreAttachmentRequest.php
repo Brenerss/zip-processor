@@ -11,7 +11,7 @@ class StoreAttachmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => ['required', 'file', 'extensions:zip', 'mimes:application/zip', 'max:10240'],
+            'file' => ['required', 'file', 'mimes:zip', 'extensions:zip', 'max:30720'],
         ];
     }
 }

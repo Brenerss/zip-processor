@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\Attachment;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -43,23 +44,27 @@ class AttachmentService
             throw new \InvalidArgumentException('File already exists');
         }
 
-        dd($this->file->getClientOriginalName(), $this->file->getClientMimeType(), $this->file->getSize());
-
         try {
             $path = $this->upload();
 
             DB::transaction(function () use ($path) {
-                Attachment::query()->create([
+                $attachment = Attachment::query()->create([
                     'filename'  => $this->file->getClientOriginalName(),
                     'mime_type' => $this->file->getClientMimeType(),
                     'path'      => $path,
                     'user_id'   => auth()->id(),
                     'size'      => $this->file->getSize(),
                 ]);
+
+                DB::afterCommit(
+                    fn () => Queue::connection('rabbitmq')
+                        ->pushRaw(
+                            json_encode(['id' => $attachment->id, 'path' => $path]),
+                            'image-processor'
+                        )
+                );
             });
         } catch (\Exception $e) {
-            dd($e);
-
             if ($path) {
                 Storage::delete($path);
             }
