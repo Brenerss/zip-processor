@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
@@ -16,9 +17,12 @@ type DynamoStorage struct {
 }
 
 func NewDynamoStorage() (*DynamoStorage, error) {
+	credProvider := credentials.NewStaticCredentialsProvider("local", "local", "")
+
 	cfg, err := config.LoadDefaultConfig(
 		context.TODO(),
 		config.WithRegion("us-east-1"),
+		config.WithCredentialsProvider(credProvider),
 	)
 	if err != nil {
 		return nil, err

@@ -34,8 +34,6 @@ func StartConsumer(db *storage.DynamoStorage, s3Client *storage.S3Storage) error
 	q, err := ch.QueueDeclare("image-processor", true, false, false, false, nil)
 	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
 
-	fmt.Printf("%v", msgs)
-
 	forever := make(chan bool)
 
 	go func() {

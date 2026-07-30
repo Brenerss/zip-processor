@@ -46,8 +46,6 @@ func ProcessZip(filepath string, fileID int64, db *storage.DynamoStorage) error 
 }
 
 func processSingleFile(file *zip.File, fileID int64, db *storage.DynamoStorage) error {
-	log.Printf("extracting and processing: %s", file.Name)
-
 	src, err := file.Open()
 	if err != nil {
 		return err
@@ -79,8 +77,6 @@ func processSingleFile(file *zip.File, fileID int64, db *storage.DynamoStorage) 
 	if err != nil {
 		log.Printf("an error ocurred to save on DB: %v", err)
 	}
-
-	log.Printf("File %s sucessfully resized", file.Name)
 
 	return nil
 }
