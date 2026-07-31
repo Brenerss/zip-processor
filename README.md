@@ -2,7 +2,6 @@
 
 ![Laravel](https://img.shields.io/badge/API_Gateway-Laravel-FF2D20?style=for-the-badge&logo=laravel)
 ![Golang](https://img.shields.io/badge/Worker-Golang-00ADD8?style=for-the-badge&logo=go)
-![React](https://img.shields.io/badge/Frontend-React_TS-20232A?style=for-the-badge&logo=react)
 ![RabbitMQ](https://img.shields.io/badge/Message_Broker-RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq)
 ![PostgreSQL](https://img.shields.io/badge/SQL-PostgreSQL-316192?style=for-the-badge&logo=postgresql)
 ![DynamoDB](https://img.shields.io/badge/NoSQL-DynamoDB-4053D6?style=for-the-badge&logo=amazon-dynamodb)
