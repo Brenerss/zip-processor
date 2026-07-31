@@ -3,12 +3,18 @@ package main
 import (
 	"log"
 
+	"github.com/joho/godotenv"
 	"github.com/processorsystem/internal/queue"
 	"github.com/processorsystem/internal/storage"
 )
 
 func main() {
 	log.Println("Starting worker processor...")
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Println(".env file not found")
+	}
 
 	db, err := storage.NewDynamoStorage()
 	if err != nil {

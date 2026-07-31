@@ -18,11 +18,15 @@ type S3Storage struct {
 }
 
 func NewS3Storage() (*S3Storage, error) {
-	credProvider := credentials.NewStaticCredentialsProvider("root", "password", "")
+	credProvider := credentials.NewStaticCredentialsProvider(
+		os.Getenv("AWS_ACCESS_KEY_ID"),
+		os.Getenv("AWS_SECRET_ACCESS_KEY"),
+		"",
+	)
 
 	cfg, err := config.LoadDefaultConfig(
 		context.TODO(),
-		config.WithRegion("us-east-1"),
+		config.WithRegion(os.Getenv("AWS_REGION")),
 		config.WithCredentialsProvider(credProvider),
 	)
 	if err != nil {
@@ -30,13 +34,13 @@ func NewS3Storage() (*S3Storage, error) {
 	}
 
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
-		o.BaseEndpoint = aws.String("http://localhost:9000")
+		o.BaseEndpoint = aws.String(os.Getenv("MINIO_ENDPOINT"))
 		o.UsePathStyle = true
 	})
 
 	return &S3Storage{
 		Client:     client,
-		BucketName: "processor-bucket",
+		BucketName: os.Getenv("S3_BUCKET_NAME"),
 	}, nil
 }
 

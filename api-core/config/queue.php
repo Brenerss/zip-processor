@@ -63,7 +63,7 @@ return [
         ],
         'rabbitmq' => [
             'driver' => 'rabbitmq',
-            'queue' => 'image-processor',
+            'queue'  => 'image-processor',
             'hosts'  => [
                 [
                     'host'     => env('RABBITMQ_HOST', '127.0.0.1'),

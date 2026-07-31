@@ -37,4 +37,7 @@ return [
         ],
     ],
 
+    'processor-image' => [
+        'secret' => env('WORKER_API_KEY'),
+    ],
 ];

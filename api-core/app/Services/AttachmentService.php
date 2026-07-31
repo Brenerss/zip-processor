@@ -57,7 +57,7 @@ class AttachmentService
                 ]);
 
                 DB::afterCommit(
-                    fn () => Queue::connection('rabbitmq')
+                    fn() => Queue::connection('rabbitmq')
                         ->pushRaw(
                             json_encode(['id' => $attachment->id, 'path' => $path]),
                             'image-processor'

@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -17,11 +18,15 @@ type DynamoStorage struct {
 }
 
 func NewDynamoStorage() (*DynamoStorage, error) {
-	credProvider := credentials.NewStaticCredentialsProvider("local", "local", "")
+	credProvider := credentials.NewStaticCredentialsProvider(
+		os.Getenv("AWS_ACCESS_KEY_ID"),
+		os.Getenv("AWS_SECRET_ACCESS_KEY"),
+		"",
+	)
 
 	cfg, err := config.LoadDefaultConfig(
 		context.TODO(),
-		config.WithRegion("us-east-1"),
+		config.WithRegion(os.Getenv("AWS_REGION")),
 		config.WithCredentialsProvider(credProvider),
 	)
 	if err != nil {
@@ -29,7 +34,7 @@ func NewDynamoStorage() (*DynamoStorage, error) {
 	}
 
 	client := dynamodb.NewFromConfig(cfg, func(o *dynamodb.Options) {
-		o.BaseEndpoint = aws.String("http://localhost:8002")
+		o.BaseEndpoint = aws.String(os.Getenv("DYNAMO_ENDPOINT"))
 	})
 
 	return &DynamoStorage{

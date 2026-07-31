@@ -60,8 +60,8 @@ services:
     environment:
       DYNAMO_ENDPOINT: "http://dynamodb_local:8000"
       AWS_REGION: "us-east-1"
-      AWS_ACCESS_KEY_ID: "local"
-      AWS_SECRET_ACCESS_KEY: "local"
+      AWS_ACCESS_KEY_ID: "root"
+      AWS_SECRET_ACCESS_KEY: "password"
 volumes:
   pgdata:
   miniodata:
