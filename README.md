@@ -1,4 +1,4 @@
-# 🚀 Event-Driven Distributed Image Processing System (WIP)
+# Distributed Image Processing System (WIP)
 
 ![Laravel](https://img.shields.io/badge/API_Gateway-Laravel-FF2D20?style=for-the-badge&logo=laravel)
 ![Golang](https://img.shields.io/badge/Worker-Golang-00ADD8?style=for-the-badge&logo=go)
